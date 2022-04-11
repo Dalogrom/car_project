@@ -1,0 +1,18 @@
+﻿  main.cpp
+C:\Pogromist\Urazov_car_proj\src\main.cpp(52,23): warning C4305: инициализация: усечение из "double" в "GLfloat"
+C:\Pogromist\Urazov_car_proj\src\main.cpp(129,53): warning C4244: =: преобразование "double" в "GLfloat", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(133,1): warning C4305: =: усечение из "double" в "float"
+C:\Pogromist\Urazov_car_proj\src\main.cpp(134,1): warning C4305: =: усечение из "double" в "float"
+C:\Pogromist\Urazov_car_proj\src\main.cpp(180,55): warning C4244: =: преобразование "double" в "GLfloat", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(412,79): warning C4244: инициализация: преобразование "int" в "GLfloat", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(456,1): warning C4305: +=: усечение из "double" в "GLfloat"
+C:\Pogromist\Urazov_car_proj\src\main.cpp(463,55): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(463,44): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(463,30): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(473,77): warning C4244: =: преобразование "int" в "GLfloat", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(475,88): warning C4244: =: преобразование "int" в "GLfloat", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(482,55): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(482,44): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(482,30): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(715,17): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+  Urazov_car_proj.vcxproj -> C:\Pogromist\Urazov_car_proj\x64\Debug\Urazov_car_proj.exe
