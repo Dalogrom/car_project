@@ -122,11 +122,12 @@ public:
 		}
 		
 		if (isInStateOf == MovementState::BROKEN) {
+			stayCounter--;
 			if (stayCounter == 0) stayCounter = 50;
 			colorValue = (float)stayCounter / 50.0f + 1.4f;
 		}
 		else if (stayCounter > 0) colorValue = 0;
-		else colorValue = (currentSpeed / initialSpeed)/2 + 0.2;
+		else colorValue = (currentSpeed / initialSpeed)/2 + 0.3;
 		
 		//ImVec2 pos = ImGui::GetCursorPos();
 		ImVec2 pos;
@@ -174,6 +175,8 @@ public:
 		GLfloat colorValue = 0;
 
 		if (isInStateOf == MovementState::BROKEN) {
+			stayCounter--;
+			if (stayCounter == 0) stayCounter = 50;
 			colorValue = (float)stayCounter / 50.0f + 1.4f;
 		}
 		else if (stayCounter > 0) colorValue = 0;
@@ -525,7 +528,6 @@ int main() {
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
 	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Polygon", NULL, NULL);
-
 	if (window == NULL) {
 		std::cout << "Failed to create window" << std::endl;
 		glfwTerminate();
@@ -533,6 +535,7 @@ int main() {
 	}
 
 	glfwMakeContextCurrent(window);
+	glfwSetWindowPos(window, 100, 50);
 
 	gladLoadGL();
 
@@ -569,7 +572,7 @@ int main() {
 	//______________________________________T_E_X_T_U_R_E_S__________________________________________//
 	
 	
-	GLuint texture, texture2;
+	GLuint texture, texture2, texture3;
 	
 	glGenTextures(1, &texture);
 	glBindTexture(GL_TEXTURE_2D, texture);// All upcoming GL_TEXTURE_2D operations now have effect on this texture object
@@ -618,6 +621,32 @@ int main() {
 	}
 	//glPixelStore(GL_UNPACK_ALIGNMENT, 1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidthForBg, imageHeightForBg,
+		0, GL_RGBA, GL_UNSIGNED_BYTE, storeForImages);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	SOIL_free_image_data(storeForImages);
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//////////////////////////
+
+	glGenTextures(1, &texture3);
+	glBindTexture(GL_TEXTURE_2D, texture3);
+
+	// Set the texture wrapping parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
+
+	// Set texture filtering parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	int imageWidthForTunnel, imageHeightForTunnel;
+	storeForImages = SOIL_load_image("rsc/tunnel.png", &imageWidthForTunnel,
+		&imageHeightForTunnel, 0, SOIL_LOAD_RGBA);
+	if (storeForImages == 0) {
+		std::cout << "Voof!\n";
+	}
+	//glPixelStore(GL_UNPACK_ALIGNMENT, 1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidthForTunnel, imageHeightForTunnel,
 		0, GL_RGBA, GL_UNSIGNED_BYTE, storeForImages);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	SOIL_free_image_data(storeForImages);
@@ -694,29 +723,13 @@ int main() {
 	int deltaFrames = 0;
 	int lastSecondFrameRate = 0;
 	int secondsPassed = 0;
-	const ImVec2 pos = ImVec2(0.0, 0.0);
-	const ImVec2 pivot = ImVec2(0.0, 0.0);
-	//bool p_open = NULL;
-	//glm::mat4 transform = glm::mat4(1.0f);
-	GLfloat radius = 0.7f;
-	GLfloat way = 0.0f;
-	GLfloat speed = 0.004f;
-	std::queue<GLfloat> q;
-	//std::queue<int> current;
-	GLfloat placeOnTheRoad = 0;
-	q.push(0);
-	q.push(3.125);
-	q.push(6.25);
-	q.push(9.125);
-	q.push(12.25);
-	q.push(15.5);
-	int queueMax = (int)q.size();
-	//
+	const ImVec2 menuWindowPosition = ImVec2(0.0, 0.0);
+	const ImVec2 commentaryWindowPosition = ImVec2(0.0, 575.0);
+	const ImVec2 windowPivot = ImVec2(0.0, 0.0);
+
 	std::srand(time(NULL));
 
 	Experiment mainExperiment(shaderProgram, VAO, texture);
-
-
 
 	double currentTime = 0;
 	double lastTime = 0;
@@ -726,12 +739,9 @@ int main() {
 	GLfloat fastenSpeed = 1.5;
 	GLfloat minInitialSpeed = 20;
 	GLfloat maxInitialSpeed = 60;
-	//int initialSpeed = (minInitialSpeed + maxInitialSpeed)/2;
-	//int initialSpeed = 20;
 	int minTimeForCarToAppear = 3;
 	int maxTimeForCarToAppear = 6;
-	//float timeForCarToAppear = (minTimeForCarToAppear + maxTimeForCarToAppear) / 2;
-
+	
 	bool buttonClickedOnceFlag = false;
 	bool wreckButtonClickedFlag = false;
 	bool pauseButtonClickedFlag = false;
@@ -739,49 +749,27 @@ int main() {
 	
 	while (!glfwWindowShouldClose(window)) {
 
-		//******
+		//****** glfw обновление окна ******\\
 
-		glClearColor(0.15f, 0.05f, 0.05f, 1.0f);
+		glClearColor(0.05f, 0.25f, 0.45f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-		//******
-
-		//glActiveTexture(GL_TEXTURE0);
-		//glBindTexture(GL_TEXTURE_2D, texture);
-		//glUniform1i(glGetUniformLocation(shaderProgram, "ourTexture"), 0);
+		//****** imgui обновление окна ******\\
 
 		ImGui_ImplOpenGL3_NewFrame();
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
-
-		//******
-		//q.push(0);
-		/*
-		if (q.size() > 0) {
-			for (int queueProgression = 0; queueProgression < queueMax; queueProgression++) {
-				placeOnTheRoad = q.front();
-				move_a_car(&placeOnTheRoad, speed, shaderProgram, VAO);
-				q.pop();
-				if ((placeOnTheRoad / 50) < ROAD_LENGTH) {
-					q.push(placeOnTheRoad);
-				}
-				else queueMax--;
-			}
-		}
-		*/
+		//****** отрисовка заднего фона ******\\
 
 		glm::mat4 transform = glm::mat4(1.0f);
 		GLfloat colorValue = 3;
-
 		transform = glm::scale(transform, glm::vec3(2, 2, 0));
 
-		// Get matrix's uniform location and set matrix
 		GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
 		GLint coloringLoc = glGetUniformLocation(shaderProgram, "carColor");
-		//glUniformMatrix(coloringLoc, 1, GL_FALSE, &colorValue);
 		glUniform1f(coloringLoc, colorValue);
 
 		glActiveTexture(GL_TEXTURE1);
@@ -789,56 +777,79 @@ int main() {
 		glUniform1i(glGetUniformLocation(shaderProgram, "bgTexture"), 1);
 
 		glBindVertexArray(VAO);
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 
+		//****** основная итерация эксперимента ******\\
+
 		mainExperiment.setExperiment(minInitialSpeed, maxInitialSpeed, slowSpeed, minTimeForCarToAppear, maxTimeForCarToAppear);
-		//mainExperiment.continueTheExperiment();
 		mainExperiment.oneProcessMomentComputation();
+
+		//****** дополнительные отрисовки ******\\
+
+		transform = glm::mat4(1.0f);
+		colorValue = 4;
+		transform = glm::translate(transform, glm::vec3(0.31f, 0.08f, 0.0f));
+		transform = glm::rotate(transform, glm::radians(135.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		transform = glm::scale(transform, glm::vec3(0.17, 0.17, 0));
+
+
+		//transformLoc = glGetUniformLocation(shaderProgram, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		//coloringLoc = glGetUniformLocation(shaderProgram, "carColor");
+		glUniform1f(coloringLoc, colorValue);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, texture3);
+		glUniform1i(glGetUniformLocation(shaderProgram, "tunnelTexture"), 2);
+
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+		transform = glm::mat4(1.0f);
+		colorValue = 4;
+		transform = glm::translate(transform, glm::vec3(-0.033f, 0.614f, 0.0f));
+		transform = glm::rotate(transform, glm::radians(20.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		transform = glm::scale(transform, glm::vec3(0.17, 0.17, 0));
+
+
+		//transformLoc = glGetUniformLocation(shaderProgram, "transform");
+		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+
+		//coloringLoc = glGetUniformLocation(shaderProgram, "carColor");
+		glUniform1f(coloringLoc, colorValue);
+
+		glActiveTexture(GL_TEXTURE2);
+		glBindTexture(GL_TEXTURE_2D, texture3);
+		glUniform1i(glGetUniformLocation(shaderProgram, "tunnelTexture"), 2);
+
+		glBindVertexArray(VAO);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glBindVertexArray(0);
+
+
+		//****** проверка клика по машине если нажата кнопка поломки машины ******\\
+
 		double positX = 0;
 		double positY = 0;
 
 		glfwGetCursorPos(window, &positX, &positY);
-		glm::vec2 posit(positX, positY);
-		coordinateChanger(posit.x, posit.y);
-
-		//glfwGetCursorPos(window, 0, 0);
+		glm::vec2 cursorPosition(positX, positY);
+		coordinateChanger(cursorPosition.x, cursorPosition.y);
 
 		buttonMouseState = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT);
-		//if (buttonClickedFlag && buttonMouseState == GLFW_PRESS) buttonClickedFlag = true;
 		if (buttonMouseState == GLFW_PRESS && buttonClickedOnceFlag &&
-			wreckButtonClickedFlag && mainExperiment.wreckTheCarInPlace(posit)) {
-			//std::cout << "SUCCEED: " << posit.x << ", " << posit.y << std::endl;
+			wreckButtonClickedFlag && mainExperiment.wreckTheCarInPlace(cursorPosition)) {
 			wreckButtonClickedFlag = false;
 		}
 
 		if (buttonMouseState == GLFW_PRESS) buttonClickedOnceFlag = false;
-		else buttonClickedOnceFlag = true;
+		else buttonClickedOnceFlag = true; //чтобы кнопка не нажималась несколько раз
 
-		//queueMax = q.size();
-		/*
-		glUseProgram(shaderProgram);
+		//****** контроль количества кадров/сек, подсчёт их количества ******\\
 
-		if (radius > 0.3) {
-			transform = glm::mat4(1.0f);
-			way += speed;
-			radius -= speed / 50;
-
-			transform = glm::rotate(transform, -way, glm::vec3(0.0f, 0.0f, 1.0f));
-			transform = glm::translate(transform, glm::vec3(0.0f, radius, 0.0f));
-
-			// Get matrix's uniform location and set matrix
-			GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
-			glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-
-			glBindVertexArray(VAO);
-			//glDrawArrays(GL_TRIANGLES, 0, 6);
-			glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-			glBindVertexArray(0);
-		}
-		*/
-		//******
 		do {
 			delta = currentTime - lastTime;
 			currentTime = glfwGetTime();
@@ -846,48 +857,71 @@ int main() {
 		lastTime = currentTime;
 		deltaFrames++;
 
-		ImGui::SetNextWindowPos(pos, ImGuiCond_Once, pivot);
+		//****** отрисовка меню ******\\
+
+		ImGui::SetNextWindowPos(menuWindowPosition, ImGuiCond_Once, windowPivot);
 		ImGui::SetNextWindowSize(ImVec2(200.0f, 0.0f));
 		ImGui::SetNextWindowBgAlpha(0.0f);
-		ImGui::Begin("Меню", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
-		//ImGui::Text("Меню");
-		ImGui::Text("FPS: %d", lastSecondFrameRate);
 
-		ImGui::SliderFloat("d", &slowSpeed, 0, 3);
-		ImGui::Text("- deceleration");
+		ImGui::Begin("Options menu", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+			ImGui::Text("FPS: %d", lastSecondFrameRate);
 
-		ImGui::SliderFloat("min v", &minInitialSpeed, 5, 100);
-		ImGui::Text("^ - min speed");
-		ImGui::SliderFloat("max V", &maxInitialSpeed, 5, 100);
-		ImGui::Text("^ - max speed");
-		if (minInitialSpeed > maxInitialSpeed) minInitialSpeed = maxInitialSpeed;
+			ImGui::SliderFloat("d", &slowSpeed, 0, 3);
+			ImGui::Text("- deceleration");
 
-		ImGui::SliderInt("min t", &minTimeForCarToAppear, 1, 8);
-		ImGui::Text("^ - min time to appear");
-		ImGui::SliderInt("max T", &maxTimeForCarToAppear, 1, 8);
-		ImGui::Text("^ - max time to appear");
-		if (minTimeForCarToAppear > maxTimeForCarToAppear) maxTimeForCarToAppear = minTimeForCarToAppear;
+			ImGui::SliderFloat("min v", &minInitialSpeed, 5, 100);
+			ImGui::Text("^ - min speed");
+			ImGui::SliderFloat("max V", &maxInitialSpeed, 5, 100);
+			ImGui::Text("^ - max speed");
+			if (minInitialSpeed > maxInitialSpeed) minInitialSpeed = maxInitialSpeed;
 
-		if (ImGui::Button("wreck the/ncar", ImVec2(100, 100))) {
-			wreckButtonClickedFlag = !wreckButtonClickedFlag;
-		};
+			ImGui::SliderInt("min t", &minTimeForCarToAppear, 1, 8);
+			ImGui::Text("^ - min time to appear");
+			ImGui::SliderInt("max T", &maxTimeForCarToAppear, 1, 8);
+			ImGui::Text("^ - max time to appear");
+			if (minTimeForCarToAppear > maxTimeForCarToAppear) maxTimeForCarToAppear = minTimeForCarToAppear;
 
-		if (ImGui::Button("pause", ImVec2(100, 100))) {
-			pauseButtonClickedFlag = !pauseButtonClickedFlag;
-			if (pauseButtonClickedFlag) mainExperiment.stopTheExperiment();
-			else mainExperiment.continueTheExperiment();
-		};
+			if (ImGui::Button("wreck car", ImVec2(100, 50))) {
+				renewButtonClickedFlag = false;
+				wreckButtonClickedFlag = !wreckButtonClickedFlag;
+			};
 
-		if (ImGui::Button("renew", ImVec2(100, 100))) {
-			pauseButtonClickedFlag = false;
-			wreckButtonClickedFlag = false;
-			mainExperiment.renewTheExperiment();
-		};
-		
+			if (ImGui::Button("pause", ImVec2(100, 50))) {
+				renewButtonClickedFlag = false;
+				pauseButtonClickedFlag = !pauseButtonClickedFlag;
+				if (pauseButtonClickedFlag) mainExperiment.stopTheExperiment();
+				else mainExperiment.continueTheExperiment();
+			};
+
+			if (ImGui::Button("renew", ImVec2(100, 50))) {
+				renewButtonClickedFlag = true;
+				pauseButtonClickedFlag = false;
+				wreckButtonClickedFlag = false;
+				mainExperiment.renewTheExperiment();
+			};
+		ImGui::End();
+
+		//****** отрисовка меню с комментариями ******\\
+
+		ImGui::SetNextWindowPos(commentaryWindowPosition, ImGuiCond_Once, windowPivot);
+		ImGui::SetNextWindowSize(ImVec2(650.0f, 75.0f));
+		ImGui::SetNextWindowBgAlpha(0.0f);
+
+		ImGui::Begin("commentary menu", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+
+		if (renewButtonClickedFlag) {
+			ImGui::Text("Process renewed and started again.");
+		}
+		else if (wreckButtonClickedFlag) {
+			ImGui::Text("Click on the car to wreck it. Click on the button again to disable it.");
+			ImGui::Text("Car wrecked twice is fixed and will continue to ride.");
+		}
+		else if (pauseButtonClickedFlag) {
+			ImGui::Text("Process stopped. Click on the button again to continue.");
+		}
+		else ImGui::Text("Process continues.");
 
 		ImGui::End();
-		//end of interface
-		//
 
 		ImGui::Render();
 		ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());

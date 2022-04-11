@@ -23,6 +23,7 @@ void main() {
 uniform float carColor;
 uniform sampler2D carTexture;
 uniform sampler2D bgTexture;
+uniform sampler2D tunnelTexture;
 
 out vec4 color;
 in vec2 TexCoord;
@@ -32,10 +33,13 @@ void main() {
 	if (carColor == 3) {
 		simpleMix = texture(bgTexture, TexCoord);
 	}
+	else if (carColor == 4) {
+		simpleMix = texture(tunnelTexture, TexCoord);
+	}
 	else {
 		simpleMix = texture(carTexture, TexCoord);
 		if (carColor > 1.0f) {
-			simpleMix = simpleMix * vec4(0.0f, 0.0f, (carColor - 2.0f), 1.0f);
+			simpleMix = simpleMix * vec4(0.0f, 0.0f, (carColor - 1.8f), 1.0f);
 		}
 		else {
 			simpleMix = simpleMix * vec4((1.0f - carColor), (carColor), 0.0f, 1.0f);

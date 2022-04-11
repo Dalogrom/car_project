@@ -1,18 +1,19 @@
 ﻿  main.cpp
 C:\Pogromist\Urazov_car_proj\src\main.cpp(52,23): warning C4305: инициализация: усечение из "double" в "GLfloat"
-C:\Pogromist\Urazov_car_proj\src\main.cpp(129,53): warning C4244: =: преобразование "double" в "GLfloat", возможна потеря данных
-C:\Pogromist\Urazov_car_proj\src\main.cpp(133,1): warning C4305: =: усечение из "double" в "float"
+C:\Pogromist\Urazov_car_proj\src\main.cpp(130,53): warning C4244: =: преобразование "double" в "GLfloat", возможна потеря данных
 C:\Pogromist\Urazov_car_proj\src\main.cpp(134,1): warning C4305: =: усечение из "double" в "float"
-C:\Pogromist\Urazov_car_proj\src\main.cpp(180,55): warning C4244: =: преобразование "double" в "GLfloat", возможна потеря данных
-C:\Pogromist\Urazov_car_proj\src\main.cpp(412,79): warning C4244: инициализация: преобразование "int" в "GLfloat", возможна потеря данных
-C:\Pogromist\Urazov_car_proj\src\main.cpp(456,1): warning C4305: +=: усечение из "double" в "GLfloat"
-C:\Pogromist\Urazov_car_proj\src\main.cpp(463,55): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
-C:\Pogromist\Urazov_car_proj\src\main.cpp(463,44): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
-C:\Pogromist\Urazov_car_proj\src\main.cpp(463,30): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
-C:\Pogromist\Urazov_car_proj\src\main.cpp(473,77): warning C4244: =: преобразование "int" в "GLfloat", возможна потеря данных
-C:\Pogromist\Urazov_car_proj\src\main.cpp(475,88): warning C4244: =: преобразование "int" в "GLfloat", возможна потеря данных
-C:\Pogromist\Urazov_car_proj\src\main.cpp(482,55): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
-C:\Pogromist\Urazov_car_proj\src\main.cpp(482,44): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
-C:\Pogromist\Urazov_car_proj\src\main.cpp(482,30): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
-C:\Pogromist\Urazov_car_proj\src\main.cpp(715,17): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(135,1): warning C4305: =: усечение из "double" в "float"
+C:\Pogromist\Urazov_car_proj\src\main.cpp(183,55): warning C4244: =: преобразование "double" в "GLfloat", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(415,79): warning C4244: инициализация: преобразование "int" в "GLfloat", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(459,1): warning C4305: +=: усечение из "double" в "GLfloat"
+C:\Pogromist\Urazov_car_proj\src\main.cpp(466,55): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(466,44): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(466,30): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(476,77): warning C4244: =: преобразование "int" в "GLfloat", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(478,88): warning C4244: =: преобразование "int" в "GLfloat", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(485,55): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(485,44): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(485,30): warning C4244: аргумент: преобразование "GLfloat" в "int", возможна потеря данных
+C:\Pogromist\Urazov_car_proj\src\main.cpp(730,17): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
+LINK : warning LNK4098: библиотека по умолчанию "MSVCRT" конфликтует с использованием других библиотек; используйте /NODEFAULTLIB:library
   Urazov_car_proj.vcxproj -> C:\Pogromist\Urazov_car_proj\x64\Debug\Urazov_car_proj.exe
