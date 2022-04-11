@@ -177,7 +177,9 @@
     <ClInclude Include="src\shader_handle_lib.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="README.md" />
     <None Include="rsc\Basic.shader" />
+    <None Include="Urazov_car_proj.exe" />
   </ItemGroup>
   <ItemGroup>
     <Font Include="rsc\ClassicComic.ttf" />
@@ -185,6 +187,7 @@
   <ItemGroup>
     <Image Include="rsc\background.png" />
     <Image Include="rsc\car_image.png" />
+    <Image Include="rsc\tunnel.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

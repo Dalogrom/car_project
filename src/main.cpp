@@ -270,7 +270,7 @@ public:
 					nextCarShouldSlow = false;
 
 				if (distanceBetweenCars < (0.105 / frontCarRadius)) {
-					if ((nextCarIsMoving && !currentCar.isBroken()) || nextCarShouldStop) currentCar.setStateStop();
+					if ((nextCarIsMoving && !currentCar.isBroken()) || (nextCarShouldStop && !currentCar.isBroken())) currentCar.setStateStop();
 					else if (!currentCar.isStopped() && !currentCar.isSlowed())
 						currentCar.setStateNormalMove();
 					nextCarShouldStop = true;
