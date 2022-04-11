@@ -106,6 +106,8 @@ public:
 
 	void moveCar(unsigned int shaderProgram, GLuint VAO, GLuint texture) {
 
+		//****** вычисление значения скорости и подсветки машины ******\\
+
 		GLfloat colorValue = 0;
 
 		if (stayCounter > 0) stayCounter--;
@@ -129,15 +131,7 @@ public:
 		else if (stayCounter > 0) colorValue = 0;
 		else colorValue = (currentSpeed / initialSpeed)/2 + 0.3;
 		
-		//ImVec2 pos = ImGui::GetCursorPos();
-		ImVec2 pos;
-		 pos.x = 0.05;
-		 pos.y = 0.03;
-		//std::cout << colorValue << std::endl;
-		//std::cout << "Imgui: " <<pos.x << ", " << pos.y << std::endl;
-		glm::vec4 position(pos.x, pos.y, 0, 1.0f);
-		//ImGui::SetCursorPos(pos);
-
+		//****** отрисовка машины ******\\
 
 		float radius = STARTING_RADIUS - (currentPosition / RADIUS_TURNING_VALUE);
 
@@ -148,15 +142,10 @@ public:
 		transform = glm::translate(transform, glm::vec3(0.0f, radius, 0.0f));
 		transform = glm::scale(transform, glm::vec3(0.1, 0.05, 0));
 
-		position = transform * position;
-		//std::cout << "CurrentCar: (" << position.x << ", " << position.y << ")" << std::endl;
-
-		// Get matrix's uniform location and set matrix
 		GLint transformLoc = glGetUniformLocation(shaderProgram, "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
 		GLint coloringLoc = glGetUniformLocation(shaderProgram, "carColor");
-		//glUniformMatrix(coloringLoc, 1, GL_FALSE, &colorValue);
 		glUniform1f(coloringLoc, colorValue);
 
 
@@ -165,12 +154,13 @@ public:
 		glUniform1i(glGetUniformLocation(shaderProgram, "carTexture"), 0);
 
 		glBindVertexArray(VAO);
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
 
 	void drawCar(unsigned int shaderProgram, GLuint VAO, GLuint texture) {
+
+		//****** вычисление значение цвета и отрисовка машины ******\\
 
 		GLfloat colorValue = 0;
 
@@ -196,7 +186,6 @@ public:
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
 
 		GLint coloringLoc = glGetUniformLocation(shaderProgram, "carColor");
-		//glUniformMatrix(coloringLoc, 1, GL_FALSE, &colorValue);
 		glUniform1f(coloringLoc, colorValue);
 
 
@@ -205,7 +194,6 @@ public:
 		glUniform1i(glGetUniformLocation(shaderProgram, "carTexture"), 0);
 
 		glBindVertexArray(VAO);
-		//glDrawArrays(GL_TRIANGLES, 0, 6);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
 	}
@@ -216,9 +204,6 @@ public:
 		slowSpeed = startSlow;
 		fastenSpeed = startFasten;
 	};
-	/*~Car() {
-		std::cout << "I'm deleted, don't worry\n";
-	};*/
 };
 
 //***********************************************************************************************//
@@ -244,7 +229,6 @@ public:
 	}
 
 	void live(unsigned int shaderProgram, GLuint VAO, GLuint texture) {
-		//carsQueueNumber = carsQueue.size();
 		GLfloat frontCarPlace = 0;
 		GLfloat backCarPlace = 0;
 		GLfloat frontCarRadius = 0;
@@ -252,12 +236,12 @@ public:
 		GLfloat distanceBetweenCars = 0;
 		bool nextCarShouldStop = false;
 		bool nextCarShouldSlow = false;
-		//bool nextCarIsMoving = false;
 
-		//if (carsQueue.size() > 0) {
 		for (int currentCarNumber = 0; currentCarNumber < carsQueueNumber; currentCarNumber++) {
+			
+			//****** организация очереди машин на дороге ******\\
+
 			bool nextCarIsMoving = false;
-			//std::cout << "Voof!\n";
 			Car currentCar = carsQueue.front();
 			frontCarPlace = currentCar.getCurrentPlace();
 			frontCarRadius = currentCar.getCurrentRadius();
@@ -267,22 +251,19 @@ public:
 				else if (nextCarShouldSlow) currentCar.setStateSlow();
 				else currentCar.setStateNormalMove();
 			}
-			//nextCarShouldStop = false;
-			//nextCarShouldSlow = false;
 
 			carsQueue.pop();
 			if (currentCarNumber + 1 < carsQueueNumber) {
-				//std::cout << "Voof2!\n";
+
+				//****** проверка близости двух машин ******\\
+
 				Car nextCar = carsQueue.front();
 				if (!nextCar.isStopped()) nextCarIsMoving = true;
-				//else nextCarIsMoving = false;
+
 				backCarPlace = nextCar.getCurrentPlace();
 				backCarRadius = nextCar.getCurrentRadius();
 				distanceBetweenCars = frontCarPlace - backCarPlace;
-				//std::cout << distanceBetweenCars << " : " << 0.11 / frontCarRadius << std::endl;
-				//distanceBetweenCars = STARTING_RADIUS - (frontCarPlace - backCarPlace) / RADIUS_TURNING_VALUE;
-				//distanceBetweenCars = (backCarPlace/backCarRadius) / (frontCarPlace/frontCarRadius);
-				//backCarPlace = frontCarPlace;
+
 				if (distanceBetweenCars < (0.35 / frontCarRadius))
 					nextCarShouldSlow = true;
 				else
@@ -293,25 +274,18 @@ public:
 					else if (!currentCar.isStopped() && !currentCar.isSlowed())
 						currentCar.setStateNormalMove();
 					nextCarShouldStop = true;
-					//nextCarIsMoving = false;
 				}
 				else {
 					nextCarShouldStop = false;
-					//currentCar.setStateNormalMove();
 				}
 			}
 
 			currentCar.moveCar(shaderProgram, VAO, texture);
 
 			if (currentCar.stillRiding()) {
-				//if (nextCarIsMoving && nextCarShouldStop) currentCar.setStateStop();
-				//else currentCar.setStateNormalMove();
-				//nextCarIsMoving = false;
 				carsQueue.push(currentCar);
 			}
-
 			else {
-				//delete currentCar;
 				nextCarShouldSlow = false;
 				nextCarShouldStop = false;
 				carsFinished++;
@@ -319,31 +293,21 @@ public:
 		}
 		carsQueueNumber -= carsFinished;
 		carsFinished = 0;
-		//nextCarShouldSlow = false;
-		//nextCarShouldStop = false;
 	}
 
-	/*
-	 0.05f,  0.03f, 0.0f,  // Top Right
-	 0.05f, -0.03f, 0.0f,  // Bottom Right
-	-0.05f, -0.03f, 0.0f,  // Bottom Left
-	-0.05f,  0.03f, 0.0f   // Top Left 
-	*/
-
 	bool goWreckCar(glm::vec2 carPositionToWreck) {
+
+		//****** поломока машины ******\\
+
 		bool resultReached = false;
-		//GLfloat distanceBetweenTheCursorNCar = 0;
 		for (int currentCarNumber = 0; currentCarNumber < carsQueue.size(); currentCarNumber++) {
 			Car currentCar = carsQueue.front();
 			GLfloat distanceBetweenTheCursorNCar = 0;
 			if (!resultReached) {
-				//Car currentCar = carsQueue.front();
 				GLfloat currentCarPositionOnTrack = currentCar.getCurrentPlace();
 				GLfloat currentCarRadius = currentCar.getCurrentRadius();
-				//GLfloat distanceBetweenTheCursorNCar = 0;
 				glm::vec4 currentCarVec(0, 0, 0.0, 1.0);
 				glm::vec4 currentSearchedCarVec(carPositionToWreck.x, carPositionToWreck.y, 0, 1.0f);
-
 
 				glm::mat4 transform = glm::mat4(1.0f);
 
@@ -352,12 +316,8 @@ public:
 				transform = glm::translate(transform, glm::vec3(0.0f, currentCarRadius, 0.0f));
 
 				currentCarVec = transform * currentCarVec;
-				//currentSearchedCarVec = transform * currentSearchedCarVec;
-
-				//std::cout << "first car: (" << currentCarVec.x << ", " << currentCarVec.y << ")" << std::endl;
-				//std::cout << "looking for: " << currentSearchedCarVec.x << ", " << currentSearchedCarVec.y << ")" << std::endl;
+				
 				distanceBetweenTheCursorNCar = glm::length(currentCarVec - currentSearchedCarVec);
-				//std::cout << "distance between: " << distanceBetweenTheCursorNCar << std::endl;
 			}
 			carsQueue.pop();
 			if (distanceBetweenTheCursorNCar < 0.05 && !resultReached) {
@@ -371,14 +331,19 @@ public:
 	}
 
 	void purge() {
+
+		//****** очистка дороги ******\\
+
 		while (carsQueue.size() > 0) {
 			carsQueue.pop();
 		}
-		std::cout << "PUUURGEEEE!\n";
 		carsQueueNumber = 0;
 	}
 
 	void lifeStopped(unsigned int shaderProgram, GLuint VAO, GLuint texture) {
+
+		//****** отрисовка машин при паузе ******\\
+
 		for (int currentCarNumber = 0; currentCarNumber < carsQueue.size(); currentCarNumber++) {
 			Car currentCar = carsQueue.front();
 			currentCar.drawCar(shaderProgram, VAO, texture);
@@ -407,7 +372,6 @@ private:
 	GLfloat fastenSpeed = 1.5;
 	GLfloat minInitialSpeed = 20;
 	GLfloat maxInitialSpeed = 60;
-	//int initialSpeed = (minInitialSpeed + maxInitialSpeed)/2;
 	GLfloat initialSpeed = 20;
 	ExperimentState currentExperimentProcess = ExperimentState::IS_CONTINUING;
 	int minTimeForCarToAppear = 3;
@@ -424,7 +388,6 @@ public:
 
 	void setExperiment(GLfloat inputMinSpeed, GLfloat inputMaxSpeed, GLfloat inputSlowSpeed, int inputMinAppearTime, int inputMaxAppearTime) {
 		slowSpeed = inputSlowSpeed;
-		//fastenSpeed = inputSlowSpeed;
 		minInitialSpeed = inputMinSpeed;
 		maxInitialSpeed = inputMaxSpeed;
 		minTimeForCarToAppear = inputMinAppearTime;
@@ -455,6 +418,9 @@ public:
 	}
 
 	void oneProcessMomentComputation() {
+
+	//****** обработка одного момента эксперимента в зависимости от состояния ******\\
+
 		if (currentExperimentProcess == ExperimentState::IS_CONTINUING) {
 			timePassed += 0.04;
 			mainRoad.live(experimentShaderProgram, experimentVAO, textureID);
@@ -473,9 +439,13 @@ public:
 		if ((timePassed - lastCarCreationTime > timeForCarToAppear) && 
 			(currentExperimentProcess == ExperimentState::IS_CONTINUING)) {
 
-			if (minTimeForCarToAppear == maxTimeForCarToAppear) timeForCarToAppear = maxTimeForCarToAppear;
-			else
+			if (minTimeForCarToAppear == maxTimeForCarToAppear) {
+				timeForCarToAppear = maxTimeForCarToAppear;
+			}
+			else {
 				timeForCarToAppear = std::rand() % (maxTimeForCarToAppear - minTimeForCarToAppear) + minTimeForCarToAppear;
+			}
+			
 			lastCarCreationTime = timePassed;
 			
 			if (minInitialSpeed == maxInitialSpeed) initialSpeed = maxInitialSpeed;
@@ -488,19 +458,16 @@ public:
 
 	bool wreckTheCarInPlace(glm::vec2 carPositionToWreck) {
 		if (mainRoad.goWreckCar(carPositionToWreck)) {
-			//std::cout << "meow";
 			return true;
 		}
 		return false;
 	}
 
 	Experiment(unsigned int shaderProgram, GLuint VAO, GLuint texture) : mainRoad(initialSpeed, slowSpeed, fastenSpeed) {
-		//mainRoad(initialSpeed, slowSpeed, fastenSpeed);
 		experimentVAO = VAO;
 		experimentShaderProgram = shaderProgram;
 		textureID = texture;
 	};
-	//~Experiment();
 };
 
 
@@ -521,11 +488,14 @@ public:
 
 int main() {
 
+	//****** glfw инициализация общего окна ******\\
+
 	glfwInit();
 
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
 	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+	glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
 	GLFWwindow* window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Polygon", NULL, NULL);
 	if (window == NULL) {
@@ -535,53 +505,29 @@ int main() {
 	}
 
 	glfwMakeContextCurrent(window);
-	glfwSetWindowPos(window, 100, 50);
+	glfwSetWindowPos(window, 200, 50);
 
 	gladLoadGL();
 
 	glViewport(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
 
-	// Обработка закрытия окна по нажатию кнопки Esc
 	glfwSetKeyCallback(window, key_callback);
-	//glfwSetInputMode(window, GLFW_STICKY_MOUSE_BUTTONS, GLFW_FALSE);
 
-	//glfwSetMouseButtonCallback(window, mouse_callback);
 	int buttonMouseState = 0;
-	//bool leftMouseButtonPressed = false;
-
-	/*
-	GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertexShader, 1, &shaderSource.VertexSource, NULL);
-	glCompileShader(vertexShader);
-
-	GLuint fragmentShader = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(fragmentShader, 1, &shaderSource.FragmentSource, NULL);
-	glCompileShader(fragmentShader);
-
-	GLuint shaderProgram = glCreateProgram();
-
-	glAttachShader(shaderProgram, vertexShader);
-	glAttachShader(shaderProgram, fragmentShader);
-	glLinkProgram(shaderProgram);
-
-	glDeleteShader(vertexShader);
-	glDeleteShader(fragmentShader);
-	*/
 
 	//***********************************************************************************************//
 	//______________________________________T_E_X_T_U_R_E_S__________________________________________//
 	
 	
 	GLuint texture, texture2, texture3;
+
+	//****** загрузка текстуры машины ******\\
 	
 	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);// All upcoming GL_TEXTURE_2D operations now have effect on this texture object
-    
-	// Set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 	
-	// Set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -589,9 +535,8 @@ int main() {
 	unsigned char* storeForImages = SOIL_load_image("rsc/car_image.png", &imageWidthForCar,
 												&imageHeightForCar, 0, SOIL_LOAD_RGBA);
 	if (storeForImages == 0) {
-		std::cout << "Voof!\n";
+		std::cout << "Failed to load image\n";
 	}
-	//glPixelStore(GL_UNPACK_ALIGNMENT, 1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidthForCar, imageHeightForCar,
 		0, GL_RGBA, GL_UNSIGNED_BYTE, storeForImages);
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -600,16 +545,14 @@ int main() {
 
 	glEnable(GL_BLEND);
 
-	//////////////////////////
+	//****** загрузка текстуры фона ******\\
 
 	glGenTextures(1, &texture2);
 	glBindTexture(GL_TEXTURE_2D, texture2);
 
-	// Set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-	// Set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
@@ -617,35 +560,33 @@ int main() {
 	storeForImages = SOIL_load_image("rsc/background.png", &imageWidthForBg,
 		&imageHeightForBg, 0, SOIL_LOAD_RGBA);
 	if (storeForImages == 0) {
-		std::cout << "Voof!\n";
+		std::cout << "Failed to load image\n";
 	}
-	//glPixelStore(GL_UNPACK_ALIGNMENT, 1);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidthForBg, imageHeightForBg,
 		0, GL_RGBA, GL_UNSIGNED_BYTE, storeForImages);
 	glGenerateMipmap(GL_TEXTURE_2D);
 	SOIL_free_image_data(storeForImages);
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	//////////////////////////
+	//****** загрузка текстуры выхода тоннеля ******\\
 
 	glGenTextures(1, &texture3);
 	glBindTexture(GL_TEXTURE_2D, texture3);
 
-	// Set the texture wrapping parameters
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);	// Set texture wrapping to GL_REPEAT (usually basic wrapping method)
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_BORDER);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_BORDER);
 
-	// Set texture filtering parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	int imageWidthForTunnel, imageHeightForTunnel;
 	storeForImages = SOIL_load_image("rsc/tunnel.png", &imageWidthForTunnel,
 		&imageHeightForTunnel, 0, SOIL_LOAD_RGBA);
+
 	if (storeForImages == 0) {
-		std::cout << "Voof!\n";
+		std::cout << "Failed to load image\n";
 	}
-	//glPixelStore(GL_UNPACK_ALIGNMENT, 1);
+
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidthForTunnel, imageHeightForTunnel,
 		0, GL_RGBA, GL_UNSIGNED_BYTE, storeForImages);
 	glGenerateMipmap(GL_TEXTURE_2D);
@@ -653,9 +594,7 @@ int main() {
 	glBindTexture(GL_TEXTURE_2D, 0);
 
 	//***********************************************************************************************//
-	//***********************************************************************************************//
-
-	//glBindTexture(GL_TEXTURE_2D, texture);
+	//________________________________________S_H_A_D_E_R____________________________________________//
 
 	ShaderProgramSource shaderSource = ParseShader("rsc/Basic.shader");
 
@@ -663,27 +602,27 @@ int main() {
 	glUseProgram(shaderProgram);
 	
 	//***********************************************************************************************//
-	//***********************************************************************************************//
+	//_______________________________________V_E_R_T_E_X_E_S_________________________________________//
 
 
 
 	GLfloat vertices[] = {
-		0.5f,  0.5f, 0.0f,  1.0f, 0.0f, // Top Right
-		0.5f, -0.5f, 0.0f,  1.0f, 1.0f, // Bottom Right
-	   -0.5f, -0.5f, 0.0f,  0.0f, 1.0f, // Bottom Left
-	   -0.5f,  0.5f, 0.0f,  0.0f, 0.0f  // Top Left 
+		0.5f,  0.5f, 0.0f,  1.0f, 0.0f,
+		0.5f, -0.5f, 0.0f,  1.0f, 1.0f,
+	   -0.5f, -0.5f, 0.0f,  0.0f, 1.0f,
+	   -0.5f,  0.5f, 0.0f,  0.0f, 0.0f 
 	};
 
-	GLuint indices[] = {  // Note that we start from 0!
-		0, 1, 3,  // First Triangle
-		1, 2, 3   // Second Triangle
+	GLuint indices[] = {
+		0, 1, 3,
+		1, 2, 3
 	};
 
 	GLuint VBO = 0, VAO = 0, EBO = 0;
 	glGenVertexArrays(1, &VAO);
 	glGenBuffers(1, &VBO);
 	glGenBuffers(1, &EBO);
-	// Bind the Vertex Array Object first, then bind and set vertex buffer(s) and attribute pointer(s).
+
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
@@ -698,33 +637,31 @@ int main() {
 	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
 	glEnableVertexAttribArray(1);
 
-	glBindBuffer(GL_ARRAY_BUFFER, 0); // Note that this is allowed, the call to glVertexAttribPointer registered VBO as the currently bound vertex buffer object so afterwards we can safely unbind
-
-	glBindVertexArray(VAO); // Unbind VAO (it's always a good thing to unbind any buffer/array to prevent strange bugs), remember: do NOT unbind the EBO, keep it bound to this VAO
-
+	glBindBuffer(GL_ARRAY_BUFFER, VBO);
+	glBindVertexArray(VAO);
 
 
 
 	//***********************************************************************************************//
-	//***********************************************************************************************//
+	//__________________________________________I_M_G_U_I____________________________________________//
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
-	//(void)io;
 	io.Fonts->AddFontFromFileTTF("rsc/ClassicComic.ttf", 16);
 	ImGui::StyleColorsDark();
 	ImGui_ImplGlfw_InitForOpenGL(window, true);
 	ImGui_ImplOpenGL3_Init("#version 330");
 
 	//***********************************************************************************************//
-	//***********************************************************************************************//
+	//____________________________________________M_A_I_N____________________________________________//
 
 	int deltaFrames = 0;
 	int lastSecondFrameRate = 0;
 	int secondsPassed = 0;
 	const ImVec2 menuWindowPosition = ImVec2(0.0, 0.0);
 	const ImVec2 commentaryWindowPosition = ImVec2(0.0, 575.0);
+	const ImVec2 exitWindowPosition = ImVec2(610.0, 0.0);
 	const ImVec2 windowPivot = ImVec2(0.0, 0.0);
 
 	std::srand(time(NULL));
@@ -794,10 +731,7 @@ int main() {
 		transform = glm::scale(transform, glm::vec3(0.17, 0.17, 0));
 
 
-		//transformLoc = glGetUniformLocation(shaderProgram, "transform");
 		glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
-
-		//coloringLoc = glGetUniformLocation(shaderProgram, "carColor");
 		glUniform1f(coloringLoc, colorValue);
 
 		glActiveTexture(GL_TEXTURE2);
@@ -828,7 +762,6 @@ int main() {
 		glBindVertexArray(VAO);
 		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 		glBindVertexArray(0);
-
 
 		//****** проверка клика по машине если нажата кнопка поломки машины ******\\
 
@@ -864,6 +797,7 @@ int main() {
 		ImGui::SetNextWindowBgAlpha(0.0f);
 
 		ImGui::Begin("Options menu", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
+			
 			ImGui::Text("FPS: %d", lastSecondFrameRate);
 
 			ImGui::SliderFloat("d", &slowSpeed, 0, 3);
@@ -881,17 +815,36 @@ int main() {
 			ImGui::Text("^ - max time to appear");
 			if (minTimeForCarToAppear > maxTimeForCarToAppear) maxTimeForCarToAppear = minTimeForCarToAppear;
 
-			if (ImGui::Button("wreck car", ImVec2(100, 50))) {
-				renewButtonClickedFlag = false;
-				wreckButtonClickedFlag = !wreckButtonClickedFlag;
+			if (!wreckButtonClickedFlag) {
+				if (ImGui::Button("wreck car", ImVec2(100, 50))) {
+					renewButtonClickedFlag = false;
+					wreckButtonClickedFlag = !wreckButtonClickedFlag;
+				}
+			}
+			else {
+				if (ImGui::Button("click car", ImVec2(100, 50))) {
+					renewButtonClickedFlag = false;
+					wreckButtonClickedFlag = !wreckButtonClickedFlag;
+				}
 			};
 
-			if (ImGui::Button("pause", ImVec2(100, 50))) {
-				renewButtonClickedFlag = false;
-				pauseButtonClickedFlag = !pauseButtonClickedFlag;
-				if (pauseButtonClickedFlag) mainExperiment.stopTheExperiment();
-				else mainExperiment.continueTheExperiment();
-			};
+			if (!pauseButtonClickedFlag) {
+				if (ImGui::Button("pause", ImVec2(100, 50))) {
+					renewButtonClickedFlag = false;
+					pauseButtonClickedFlag = !pauseButtonClickedFlag;
+					if (pauseButtonClickedFlag) mainExperiment.stopTheExperiment();
+					else mainExperiment.continueTheExperiment();
+				};
+			}
+			else {
+				if (ImGui::Button("unpause", ImVec2(100, 50))) {
+					renewButtonClickedFlag = false;
+					pauseButtonClickedFlag = !pauseButtonClickedFlag;
+					if (pauseButtonClickedFlag) mainExperiment.stopTheExperiment();
+					else mainExperiment.continueTheExperiment();
+				};
+			}
+
 
 			if (ImGui::Button("renew", ImVec2(100, 50))) {
 				renewButtonClickedFlag = true;
@@ -899,6 +852,7 @@ int main() {
 				wreckButtonClickedFlag = false;
 				mainExperiment.renewTheExperiment();
 			};
+
 		ImGui::End();
 
 		//****** отрисовка меню с комментариями ******\\
@@ -909,17 +863,31 @@ int main() {
 
 		ImGui::Begin("commentary menu", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove);
 
-		if (renewButtonClickedFlag) {
-			ImGui::Text("Process renewed and started again.");
-		}
-		else if (wreckButtonClickedFlag) {
-			ImGui::Text("Click on the car to wreck it. Click on the button again to disable it.");
-			ImGui::Text("Car wrecked twice is fixed and will continue to ride.");
-		}
-		else if (pauseButtonClickedFlag) {
-			ImGui::Text("Process stopped. Click on the button again to continue.");
-		}
-		else ImGui::Text("Process continues.");
+			if (renewButtonClickedFlag) {
+				ImGui::Text("Process renewed and started again.");
+			}
+			else if (wreckButtonClickedFlag) {
+				ImGui::Text("Click on the car to wreck it. Click on the button again to disable it.");
+				ImGui::Text("Car wrecked twice is fixed and will continue to ride.");
+			}
+			else if (pauseButtonClickedFlag) {
+				ImGui::Text("Process stopped. Click on the button again to continue.");
+			}
+			else ImGui::Text("Process continues.");
+
+		ImGui::End();
+
+		//****** отрисовка кнопка закрытия процесса ******\\
+
+		ImGui::SetNextWindowPos(exitWindowPosition, ImGuiCond_Once, windowPivot);
+		ImGui::SetNextWindowSize(ImVec2(200.0f, 0.0f));
+		ImGui::SetNextWindowBgAlpha(0.0f);
+
+		ImGui::Begin(" ", NULL, ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoTitleBar);
+
+		if (ImGui::Button("X", ImVec2(25, 25))) {
+			glfwSetWindowShouldClose(window, GLFW_TRUE);
+		};
 
 		ImGui::End();
 
